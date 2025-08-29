@@ -1,35 +1,72 @@
-# PRISM2GSN Eclipse Plug-in
+# PRISM2GSN: Eclipse Plug-in for Transforming PRISM Artefacts into GSN
 
-**PRISM2GSN** is an Eclipse plug-in that reads PRISM model-checking properties and generates GSN/AdvoCATE argument fragments. 
+## 📘 Overview
+**PRISM2GSN** integrates the PRISM model checker with Eclipse and generates **GSN/AdvoCATE DSL** argument fragments from PRISM properties.
 
+👉 Full **User Guide (with images)**: `https://github.com/DhamindaA/prism2gsn-eclipse-plugin/blob/main/prism2gsn-userguide.pdf`  
+Release: https://github.com/DhamindaA/prism2gsn-eclipse-plugin/releases/tag/v1.0.0
 
-> **Platform support:** Windows 10/11 (x86_64) only.  
-> macOS/Linux are **not supported** in this artifact.
-
----
-
-## Quick Start (Windows)
-
-### Prerequisites
-- **Eclipse IDE for RCP and RAP Developers** 2025-03 (4.35) or newer
-- **JDK 21** (e.g., Eclipse Adoptium or Oracle JDK)
-- **PRISM Model Checker for Windows** (e.g., 4.8.1)
-
-### Steps
-1. **Import the project**  
-   *File → Import → General → Existing Projects into Workspace* → select this project → **Finish**.
-2. **Run the plug-in**  
-   Right-click project → *Run As → Eclipse Application* (opens a **second Eclipse** window = runtime workbench).
-3. **Configure PRISM path (in the runtime window)**  
-   *Window → Preferences → PRISM Settings* → set **PRISM bin directory**, e.g.  
-   `C:\Program Files\prism-4.8.1\bin` (must contain `prism.bat`) → **Apply and Close**.
-4. **Test**  
-   In the runtime window, create a project with:
-   - `model.prism`
-   - `properties.props` (properties **one per line**, in the same folder as the model)
-5. **Generate GSN**
-   - Edit & **Save** `properties.props` → creates `properties.props.arg.dsl`, **or**
-   - Right-click `properties.props` → **Generate GSN Fragment**.
+> **Platform:** Windows 10/11 (x86_64) only. macOS/Linux are **not supported** in this release.
 
 ---
 
+## 🛠 Prerequisites
+- **Java 21 (JDK)** — check: `java -version`
+- **Eclipse IDE for RCP and RAP Developers** 2025-03 (4.35.0) or newer
+- **PRISM Model Checker (Windows)** e.g., **4.8.1** installed locally  
+  (You will set the **PRISM bin directory**, e.g. `C:\Program Files\prism-4.8.1\bin` containing `prism.bat`.)
+
+---
+
+## ⬇️ Get the Project
+- Download the ZIP from **Releases**:  
+  https://github.com/DhamindaA/prism2gsn-eclipse-plugin/releases/tag/v1.0.0
+
+---
+
+## ▶️ Run in PDE (Runtime Workbench)
+> This workflow does **not** install anything into Eclipse. It runs in a second Eclipse window (runtime workbench).
+
+1. **Import (dev workspace)**  
+   `File → Import → General → Existing Projects into Workspace` → **Select archive file** (the ZIP) → **Finish**.
+2. **Launch runtime Eclipse**  
+   Right-click project → `Run As → Eclipse Application` (opens the **runtime** window).
+3. **Configure PRISM (runtime window)**  
+   `Window → Preferences → PRISM Settings` → set **PRISM bin directory** (e.g., `C:\Program Files\prism-4.8.1\bin`) → **Apply & Close**.
+
+---
+
+## 🚀 Use the Plug-in (runtime window)
+1. Create a project (e.g., `TestPrism`).
+2. Add `model.prism` and `properties.props` **in the same folder** (one property per line).
+3. Generate GSN:
+   - **On Save:** edit & **Save** `properties.props` → creates `properties.props.arg.dsl`
+   - **Context Menu:** right-click `properties.props` → **Generate GSN Fragment**
+
+---
+
+## 🧩 Troubleshooting
+- **“PRISM not found” / `CreateProcess error=2`** → Set PRISM path **in the runtime window** under **PRISM Settings** (folder must contain `prism.bat`).
+- **No `.arg.dsl` on save** → Ensure a `*.props` file is next to a `*.prism`/`*.pm` model; edit & save or use the context menu.
+- **Context menu missing** → Right-click the **`.props`** file (not a folder).
+- **Import/build errors** → Use **Eclipse RCP/RAP 2025-03+** and **JDK 21**.
+
+---
+
+## ⚠️ Known Limitations
+- Windows-only artifact in this release.
+- PRISM path is stored **per runtime workspace** (set it again if you launch a new runtime workspace).
+- Multi-property generation expects **one property per line** in `*.props`, co-located with the model.
+
+---
+
+## 📄 User Guide, Releases, Contact
+- **User Guide (PDF):** `[docs/PRISM2GSN-UserGuide.pdf](https://github.com/DhamindaA/prism2gsn-eclipse-plugin/blob/main/prism2gsn-userguide.pdf)`
+- **Releases:** https://github.com/DhamindaA/prism2gsn-eclipse-plugin/releases/tag/v1.0.0
+- **Contact:** Dhaminda.Abeywickrama@manchester.ac.uk
+
+---
+
+## 📜 License
+The PRISM2GSN plug-in is provided **for academic and research use only**.  
+Redistribution, modification, or commercial use is not permitted without prior written permission from the author.
