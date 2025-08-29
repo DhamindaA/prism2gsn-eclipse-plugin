@@ -1,0 +1,35 @@
+P=? [ F loc=1 ]
+
+P=? [ F loc=2 ]
+
+P=? [ G loc!=3 ]
+
+P=? [ (loc!=5) U loc=4 ]
+
+P=? [ F batt<batt_threshold ]
+
+P=? [ F<=5 loc=4 ]
+
+P=? [ G (loc!=5&loc!=6&batt>=batt_threshold) ]
+
+R{"dose"}=? [ F (loc=4|loc=5|loc=6) ]
+
+R{"moves"}=? [ F (loc=4|loc=5|loc=6) ]
+
+R{"time_in_cm"}=? [ F (loc=4|loc=5|loc=6) ]
+
+R{"time_stopped"} =? [F (loc = 4 | loc = 5 | loc = 6)]
+
+P>=1 [ F (rad=1&sw=1) ]
+
+P>=1 [ F (rad=2&sw=2) ]
+
+P>=1 [ sw=2 U loc=6 ]
+
+P>=1 [ G (sw!=0|vel=2) ]
+
+P>=1 [ G (sw!=1|vel=1) ]
+
+P>=1 [ G (sw!=2|vel=0) ]
+
+P<=0 [ F (sw!=0&op_used) ]

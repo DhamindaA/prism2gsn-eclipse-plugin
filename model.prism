@@ -1,0 +1,160 @@
+// -------------------------------------------------------------
+// DTMC Model for Nuclear Radiation Inspection Robot with SafetyWrapper
+// -------------------------------------------------------------
+
+dtmc
+
+// -------------------------------------------------------------
+// Global Parameters
+// -------------------------------------------------------------
+// These constants define the environment and robot behavior parameters.
+
+// Radiation sampling probabilities (must sum to 1.0)
+const double p_rad_crit   = 0.02; // Probability of critical radiation (rad = 2)
+const double p_rad_med    = 0.08; // Probability of warning radiation (rad = 1)
+const double p_rad_safe   = 1 - p_rad_crit - p_rad_med; // Probability of safe radiation (rad = 0)
+
+// Collision and battery dynamics
+const double p_err        = 0.01; // Probability of entering a forbidden zone on any move
+const int    batt_dec     = 20;  // Battery drain per move in Patrol mode
+const int    batt_dec_cm  = 10;  // Battery drain per move in Caution mode (slower speed)
+const int    batt_threshold = 30; // Minimum battery level (SoC %) to safely continue mission
+
+// Radiation thresholds
+const int    R1 = 1; // Warning radiation threshold (triggers Caution mode)
+const int    R2 = 2; // Critical radiation threshold (triggers Emergency mode)
+
+// -------------------------------------------------------------
+// Logical Formulas (used for guards and transitions)
+// -------------------------------------------------------------
+formula is_warning  = (rad = 1); // true if Warning level radiation is sampled
+formula is_critical = (rad = 2); // true if Critical level radiation is sampled
+
+// -------------------------------------------------------------
+// Module: AIR_Navigator
+// Models the UGV's mission behavior: location, battery, and radiation sensing
+// -------------------------------------------------------------
+module AIR_Navigator
+
+  // State variables
+  loc  : [0..6] init 0;     // Current location: 0 3 (waypoints), 4=Success, 5=Collision, 6=Abort
+  batt : [0..100] init 100; // Battery level (state of charge), initialized to 100%
+  rad  : [0..2] init 0;     // Most recent radiation sample: 0=Safe, 1=Warning, 2=Critical
+
+  // ----------------------------------------------------------
+  // Battery-abort transition: if battery is below threshold mid-mission
+  // ----------------------------------------------------------
+  [] loc < 4 & batt < batt_threshold ->
+     (loc' = 6) & (batt' = batt) & (rad' = rad);
+
+  // ----------------------------------------------------------
+  // Movement in Patrol Mode (sw = 0)
+  // Full speed, full battery drain, samples radiation at new location
+  // ----------------------------------------------------------
+  [] loc < 4 & batt >= batt_threshold & batt >= batt_dec & sw = 0 ->
+     p_err :
+       (loc' = 5) & (batt' = batt - batt_dec) & (rad' = rad) +
+     (1 - p_err) * p_rad_crit :
+       (loc' = loc + 1) & (batt' = batt - batt_dec) & (rad' = 2) +
+     (1 - p_err) * p_rad_med :
+       (loc' = loc + 1) & (batt' = batt - batt_dec) & (rad' = 1) +
+     (1 - p_err) * p_rad_safe :
+       (loc' = loc + 1) & (batt' = batt - batt_dec) & (rad' = 0);
+
+  // ----------------------------------------------------------
+  // Movement in Caution Mode (sw = 1)
+  // Slower motion, reduced battery drain, continues route cautiously
+  // ----------------------------------------------------------
+  [] loc < 4 & batt >= batt_threshold & batt >= batt_dec_cm & sw = 1 ->
+     p_err :
+       (loc' = 5) & (batt' = batt - batt_dec_cm) & (rad' = rad) +
+     (1 - p_err) * p_rad_crit :
+       (loc' = loc + 1) & (batt' = batt - batt_dec_cm) & (rad' = 2) +
+     (1 - p_err) * p_rad_med :
+       (loc' = loc + 1) & (batt' = batt - batt_dec_cm) & (rad' = 1) +
+     (1 - p_err) * p_rad_safe :
+       (loc' = loc + 1) & (batt' = batt - batt_dec_cm) & (rad' = 0);
+
+  // ----------------------------------------------------------
+  // Emergency Retrieval Mode (sw = 2)
+  // Retreats one step at a time, no battery consumption, resets radiation to safe
+  // ----------------------------------------------------------
+  //[] loc > 0 & sw = 2 ->
+  //   (loc' = loc - 1) & (batt' = batt) & (rad' = 0);
+
+  // Final step to base
+  //[] loc = 0 & sw = 2 ->
+  //   (loc' = 6) & (batt' = batt) & (rad' = 0);
+
+  // ERM: halt in place (no retreat, no drain)
+  [] loc < 4 & sw = 2 & batt >= batt_threshold -> (loc' = loc) & (batt' = batt) & (rad' = rad);
+  // ----------------------------------------------------------
+  // Absorbing Terminal States
+  // No transitions out of these; mission ends
+  // ----------------------------------------------------------
+  [] loc = 4 -> (loc' = 4); // Mission success
+  [] loc = 5 -> (loc' = 5); // Collision
+  [] loc = 6 -> (loc' = 6); // Abort (battery or retreat)
+
+endmodule
+
+// -------------------------------------------------------------
+// Module: AIR_SafetyWrapper
+// Supervisory controller for mode switching, velocity setting, and operator input control
+// -------------------------------------------------------------
+module AIR_SafetyWrapper
+
+  sw       : [0..2] init 0;    // Mode: 0=Patrol, 1=Caution, 2=Emergency
+  vel      : [0..2] init 2;    // Velocity: 2=Full, 1=Slow, 0=Stopped
+  op_used  : bool init false; // True if any operator command (hdng or vel) has been used
+
+  // Transition: Patrol ? Caution on warning-level radiation
+  [] sw = 0 & is_warning ->
+     (sw' = 1) & (vel' = 1);
+
+  // Transition: Patrol/Caution ? Emergency on critical-level radiation
+  [] sw <= 1 & is_critical ->
+     (sw' = 2) & (vel' = 0);
+
+  // Stay in Emergency mode (absorbing)
+  [] sw = 2 -> (sw' = 2) & (vel' = 0);
+
+  // ----------------------------------------------------------
+  // Operator Commands
+  // These commands are only enabled when sw = 0 (Patrol mode)
+  // When triggered, they set op_used = true for later tracking
+  // ----------------------------------------------------------
+  [hdng] sw = 0 -> (sw' = sw) & (op_used' = true); // heading request
+  [vel]  sw = 0 -> (sw' = sw) & (op_used' = true); // velocity command
+
+endmodule
+
+// -------------------------------------------------------------
+// Reward Structures
+// Used for quantitative analysis: cost, time, safety, and diagnostics
+// -------------------------------------------------------------
+
+// Reward: Each movement step forward (mission progress)
+rewards "moves"
+  loc < 4 : 1;
+endrewards
+
+// Reward: Radiation exposure incidents (warning or critical)
+rewards "dose"
+  rad >= 1 : 1;
+endrewards
+
+// Reward: Time spent in Caution mode (sw = 1)
+rewards "time_in_cm"
+  sw = 1 : 1;
+endrewards
+
+// Reward: Steps taken during Emergency Retrieval (sw = 2 and not at base)
+//rewards "retreatSteps"
+//  sw = 2 & loc > 0 : 1;
+//endrewards
+
+// Reward: Time spent completely stopped (used for energy-saving diagnostics)
+rewards "time_stopped"
+  vel = 0 : 1;
+endrewards
