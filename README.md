@@ -53,7 +53,7 @@ Release: https://github.com/DhamindaA/prism2gsn-eclipse-plugin/releases/tag/v1.0
 
 ---
 
-## ⚠️ Known Limitations
+## ⚠️ Limitations
 - Windows-only artifact in this release.
 - PRISM path is stored **per runtime workspace** (set it again if you launch a new runtime workspace).
 - Multi-property generation expects **one property per line** in `*.props`, co-located with the model.
