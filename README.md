@@ -61,7 +61,7 @@ Release: https://github.com/DhamindaA/prism2gsn-eclipse-plugin/releases/tag/v1.0
 ---
 
 ## 📄 User Guide, Releases, Contact
-- **User Guide (PDF):** `[docs/PRISM2GSN-UserGuide.pdf](https://github.com/DhamindaA/prism2gsn-eclipse-plugin/blob/main/prism2gsn-userguide.pdf)`
+- **User Guide (PDF):** https://github.com/DhamindaA/prism2gsn-eclipse-plugin/blob/main/prism2gsn-userguide.pdf
 - **Releases:** https://github.com/DhamindaA/prism2gsn-eclipse-plugin/releases/tag/v1.0.0
 - **Contact:** Dhaminda.Abeywickrama@manchester.ac.uk
 
