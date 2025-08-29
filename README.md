@@ -1,7 +1,7 @@
 # PRISM2GSN: Eclipse Plug-in for Transforming PRISM Artefacts into GSN
 
 ## 📘 Overview
-**PRISM2GSN** integrates the PRISM model checker with Eclipse and generates **GSN/AdvoCATE DSL** argument fragments from PRISM properties.
+**PRISM2GSN** transforms PRISM properties and verification results into structured GSN assurance arguments, with automated regeneration when these artefacts change. 
 
 👉 Full **User Guide (with images)**: `https://github.com/DhamindaA/prism2gsn-eclipse-plugin/blob/main/prism2gsn-userguide.pdf`  
 Release: https://github.com/DhamindaA/prism2gsn-eclipse-plugin/releases/tag/v1.0.0
