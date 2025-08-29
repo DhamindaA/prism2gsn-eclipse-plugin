@@ -1,7 +1,7 @@
 # PRISM2GSN: Eclipse Plug-in for Transforming PRISM Artefacts into GSN
 
 ## 📘 Overview
-**PRISM2GSN** transforms PRISM properties and verification results into structured GSN assurance arguments, with automated regeneration when these artefacts change. 
+**PRISM2GSN** is an Eclpse plugin for transforming PRISM specifications and verification results into Goal Structuring Notation (GSN) assurance arguments. These arguments are created in the DSL of the AdvoCATE assurance case tool and are automatically regenerated when the artefacts change.
 
 👉 Full **User Guide (with images)**: `https://github.com/DhamindaA/prism2gsn-eclipse-plugin/blob/main/prism2gsn-userguide.pdf`  
 Release: https://github.com/DhamindaA/prism2gsn-eclipse-plugin/releases/tag/v1.0.0
