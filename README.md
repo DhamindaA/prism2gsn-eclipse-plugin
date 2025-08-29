@@ -1,4 +1,4 @@
-# PRISM2GSN (Eclipse Plug-in) — **Windows Only**
+# PRISM2GSN Eclipse Plug-in
 
 **PRISM2GSN** is an Eclipse plug-in that reads PRISM model-checking properties and generates GSN/AdvoCATE argument fragments. 
 
